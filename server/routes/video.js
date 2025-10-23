@@ -16,43 +16,62 @@ router.post('/generate-video', async (req, res) => {
       message,
     } = req.body;
 
+    // Validate required fields
     if (!title || !name) {
       return res.status(400).json({ error: 'Title and name are required.' });
     }
 
-    console.log('Generating video with props:', req.body);
-
-    // ✅ Resolve background image path properly
-    let resolvedBg;
-
-    if (backgroundImage) {
-      // Remove leading /public if present
-      const relativePath = backgroundImage.replace(/^\/?public\//, '');
-      const localPath = path.resolve(__dirname, `../public/${relativePath}`);
-
-      // Check if file exists
-      if (fs.existsSync(localPath)) {
-        resolvedBg = localPath; // ✅ Use file path for server render
-      } else {
-        console.warn('⚠️ Background image not found at:', localPath);
-        resolvedBg = path.resolve(__dirname, '../public/bg images/default.jpg');
-      }
-    } else {
-      // Fallback to a default
-      resolvedBg = path.resolve(__dirname, '../public/bg images/default.jpg');
+    if (!backgroundImage) {
+      return res.status(400).json({ error: 'Background image is required.' });
     }
 
+    console.log('Generating video with props:', req.body);
+
+    // Resolve background image path for server-side rendering
+    let resolvedBg;
+
+    // Remove leading slash and /public prefix if present
+    const cleanPath = backgroundImage.replace(/^\/?(public\/)?/, '');
+    
+    // Build absolute path to the image
+    const publicDir = path.resolve(__dirname, '../../public');
+    const imagePath = path.join(publicDir, cleanPath);
+
+    console.log('Looking for background image at:', imagePath);
+
+    // Check if file exists
+    if (fs.existsSync(imagePath)) {
+      resolvedBg = imagePath;
+      console.log('✅ Background image found');
+    } else {
+      // Try alternative path (bg-images vs bg images)
+      const altPath = path.join(publicDir, 'bg-images', path.basename(cleanPath));
+      if (fs.existsSync(altPath)) {
+        resolvedBg = altPath;
+        console.log('✅ Background image found at alternative path');
+      } else {
+        console.warn('⚠️ Background image not found at:', imagePath);
+        console.warn('⚠️ Alternative path also not found:', altPath);
+        return res.status(400).json({ 
+          error: 'Background image not found',
+          details: `Image path: ${imagePath}` 
+        });
+      }
+    }
+
+    // Generate the video
     const videoPath = await generateVideo({
       title,
       subtitle: subtitle || '',
-      backgroundImage: resolvedBg, // ✅ Now absolute file path
+      backgroundImage: resolvedBg, // Absolute file path for rendering
       textColor: textColor || '#ffffff',
       duration: parseInt(duration) || 5,
       name,
       message: message || '',
     });
 
-    const videoUrl = `http://localhost:${process.env.PORT || 3000}/videos/${path.basename(videoPath)}`;
+    // Return the video URL
+    const videoUrl = `http://localhost:${process.env.PORT || 3001}/videos/${path.basename(videoPath)}`;
 
     res.json({
       success: true,
@@ -65,6 +84,7 @@ router.post('/generate-video', async (req, res) => {
     res.status(500).json({
       error: 'Failed to generate video',
       details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 });

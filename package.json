@@ -30,11 +30,13 @@
     "typescript": "5.8.2"
   },
   "scripts": {
-    "dev": "remotion studio",
-    "build": "remotion bundle",
-    "upgrade": "remotion upgrade",
-    "lint": "eslint src && tsc"
-  },
+  "dev": "remotion studio",
+  "build": "remotion bundle",
+  "server": "node server/server.js",
+  "server:dev": "nodemon server/server.js",
+  "upgrade": "remotion upgrade",
+  "lint": "eslint src && tsc"
+},
   "sideEffects": [
     "*.css"
   ]

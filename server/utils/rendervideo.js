@@ -19,12 +19,15 @@ async function generateVideo(props) {
     }
 
     console.log('Starting video render...');
+    console.log('Props:', props);
 
     // Bundle the Remotion project
     const bundleLocation = await bundle({
-      entryPoint: path.join(__dirname, '../../src/index.ts'),
-      webpackOverride: (config) => config,
+      entryPoint: path.resolve(__dirname, '../../src/index.ts'),
+      // Remove webpackOverride - not needed in v4
     });
+
+    console.log('Bundle created at:', bundleLocation);
 
     // Get composition details
     const composition = await selectComposition({
@@ -32,6 +35,8 @@ async function generateVideo(props) {
       id: compositionId,
       inputProps: props,
     });
+
+    console.log('Composition selected:', composition);
 
     // Calculate duration in frames (duration in seconds * fps)
     const durationInFrames = props.duration * 30; // 30 fps
@@ -46,6 +51,11 @@ async function generateVideo(props) {
       codec: 'h264',
       outputLocation,
       inputProps: props,
+      // Add these for better rendering
+      imageFormat: 'jpeg',
+      onProgress: ({ progress }) => {
+        console.log(`Rendering progress: ${Math.round(progress * 100)}%`);
+      },
     });
 
     console.log('Video rendered successfully:', outputLocation);
