@@ -14,7 +14,8 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={{
           title: 'Welcome',
           subtitle: 'This is amazing!',
-          backgroundImage: '#3b82f6',
+          backgroundImage: '/bg-images/sunset.png',
+          music: '/music/upbeat.mp3',
           textColor: '#ffffff',
           name: 'John Doe',
           message: 'This is a dynamic video generated with Remotion!',
