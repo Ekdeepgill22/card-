@@ -120,7 +120,7 @@ const LandingPage: React.FC = () => {
                 onChange={(e) => setBackgroundImage(e.target.value)}
               >
                 <option value="">Select a background</option>
-                <option value="/bg-images/sunset.png">Sunset</option>
+                <option value="/bg-images/1.png">Sunset</option>
               </select>
               {backgroundImage && (
                 <img

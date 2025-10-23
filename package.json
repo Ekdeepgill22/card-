@@ -27,16 +27,15 @@
     "eslint": "9.19.0",
     "nodemon": "^3.1.10",
     "prettier": "3.6.0",
-    "typescript": "5.8.2"
+    "typescript": "5.8.2",
+    "vite": "^7.1.12"
   },
   "scripts": {
-  "dev": "remotion studio",
-  "build": "remotion bundle",
-  "server": "node server/server.js",
-  "server:dev": "nodemon server/server.js",
-  "upgrade": "remotion upgrade",
-  "lint": "eslint src && tsc"
-},
+    "dev": "vite",
+    "server": "node server/server.js",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
   "sideEffects": [
     "*.css"
   ]

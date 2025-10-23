@@ -1,5 +1,4 @@
 import { AbsoluteFill, Img, interpolate, useCurrentFrame, Audio } from 'remotion';
-import path from 'path';
 
 interface VideoProps {
   title: string;
@@ -26,29 +25,19 @@ export const VideoComposition: React.FC<VideoProps> = ({
   const subtitleOpacity = interpolate(frame, [20, 50], [0, 1]);
   const messageOpacity = interpolate(frame, [40, 70], [0, 1]);
 
-  // Resolve background image path
-  let resolvedBg: string;
-  if (typeof window !== 'undefined') {
-    // Running in browser (Remotion preview)
-    resolvedBg = backgroundImage;
-  } else {
-    // Running in Node (renderMedia) - convert to absolute path
-    const publicDir = path.join(process.cwd(), 'public');
-    resolvedBg = path.join(publicDir, backgroundImage);
-  }
+  // Use staticFile for Remotion's asset handling
+  // If backgroundImage is an absolute path (server-side), use it as is
+  // If it's a relative path (browser), use staticFile
+  const isAbsolutePath = backgroundImage.startsWith('/') && !backgroundImage.startsWith('http');
+  const resolvedBg = isAbsolutePath && typeof window === 'undefined' 
+    ? `file://${backgroundImage}` 
+    : backgroundImage;
 
-  // Resolve music path
-  let resolvedMusic: string | null = null;
-  if (music) {
-    if (typeof window !== 'undefined') {
-      // Running in browser
-      resolvedMusic = music;
-    } else {
-      // Running in Node
-      const publicDir = path.join(process.cwd(), 'public');
-      resolvedMusic = path.join(publicDir, music);
-    }
-  }
+  const resolvedMusic = music 
+    ? (music.startsWith('/') && typeof window === 'undefined' 
+        ? `file://${music}` 
+        : music)
+    : null;
 
   return (
     <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
